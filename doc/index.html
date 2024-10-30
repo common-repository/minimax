@@ -1,0 +1,101 @@
+<html>
+  <head>
+    <title></title>
+    <meta content="">
+    <style type="text/css">
+
+div.on#throbber1 {
+	visibility : visible;
+}
+
+
+div.off#throbber1 {
+	visibility : hidden;
+}
+
+
+div.on#throbber2 {
+	visibility : visible;
+}
+
+
+div.off#throbber2 {
+	visibility : hidden;
+}
+	
+div.on#throbber3 {
+	visibility : visible;
+}
+		
+div.off#throbber3 {
+	visibility : hidden;
+}
+
+</style>
+		<script type="text/javascript" src="../scripts/minimax.js"></script>
+  </head>
+  <body>
+		<script type="text/javascript">
+			var semaphore = new Semaphore();
+			
+			var data1 = new minimax('data1.txt', 'div_data');
+			data1.setSemaphore(semaphore);
+			data1.setThrobber('throbber1', 'on', 'off');
+		
+			var data2 = new minimax('data2.xml', 'div_data');
+			data2.setSemaphore(semaphore);
+			data2.setThrobber('throbber2', 'on', 'off');
+
+			var data3 = new minimax('data3.html', 'div_data');
+			data3.setSemaphore(semaphore);
+			data3.setThrobber('throbber3', 'on', 'off');
+			
+			var funcXML = function() { 
+			        if (data2.xhr.readyState == 4 && data2.xhr.status==200 ) {
+					data2.closeThrobber();
+                                        var data=data2.xhr.responseText;
+                                        semaphore.setGreen(); //we can do this because it's the semaphore
+                                        
+                                        try { //IE
+                                                xmldoc = new ActiveXObject("Microsoft.XMLDOM");
+                                                xmldoc.async = "false";
+                                                xmldoc.loadXML(data);
+                                        } catch(e) {
+                                                parser=new DOMParser();
+                                                var xmldoc=parser.parseFromString(data,"text/xml");
+                                        }
+
+                                        var text = xmldoc.getElementsByTagName('data');
+                                        
+                                        alert(text[0].firstChild.nodeValue);
+                                }
+			}
+			
+			data2.setFunc(funcXML);
+
+		</script>
+		<div id='throbber1' class='off'>Loading data1</div>
+		<div id='throbber2' class='off'>Loading data2</div>
+		<div id='throbber3' class='off'>Loading data3</div>
+		<div id='div_data'>This content will change</div>
+		<div>
+			<INPUT type="button" value="D1" onclick="
+						data1.get(); 
+						" /> 
+			<INPUT type="button" value="D2" onclick="
+						data2.post('a=1&amp;b=2');" />
+			<INPUT type="button" value="D1 'and' D2" onclick="
+						data1.get();
+						data2.get(); " />
+			<INPUT type="button" value="D3" onclick="
+			                        data3.get(); 
+						" />
+			<BR><INPUT type="radio" name="alert" value="1" checked onclick="
+			                        data2.setFunc(funcXML); 
+						" /> Show D2 in Alert Box
+			<BR><INPUT type="radio" name="alert" value="2" onclick="
+			                        data2.resetFunc(); 
+						" /> Show D2 in page
+		</div>
+	</body>
+</html>
